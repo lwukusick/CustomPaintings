@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " W",
+    "S "
+  ],
+  "key": {
+    "W": [{
+      "item": "minecraft:string"
+    }],
+    "S": [{
+      "item": "minecraft:stick"
+    }]
+  },
+  "result": {
+    "item": "custom_painting:paintbrush"
+  }
+}

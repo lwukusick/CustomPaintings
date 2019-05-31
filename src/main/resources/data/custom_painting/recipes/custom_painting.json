@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:painting"
+    },
+    {
+      "item": "custom_painting:paintbrush"
+    }
+  ],
+  "result": {
+    "item": "custom_painting:custom_painting"
+  }
+}
