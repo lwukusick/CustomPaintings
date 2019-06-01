@@ -6,16 +6,22 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.Item;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.DataSerializer;
+import net.minecraft.network.datasync.DataSerializers;
+import net.minecraft.network.play.server.SPacketSpawnPainting;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.registries.ObjectHolder;
 import org.apache.commons.lang3.Validate;
 
-public class EntityCustomPainting extends EntityHanging { //implements IEntityAdditionalSpawnData {
+public class EntityCustomPainting extends EntityHanging implements IEntityAdditionalSpawnData {
 
     @ObjectHolder("custom_painting:custom_painting")
     public static final EntityType<EntityCustomPainting> paintingEntity = null;
@@ -31,12 +37,20 @@ public class EntityCustomPainting extends EntityHanging { //implements IEntityAd
         super(paintingEntity, worldIn, pos);
         this.updateFacingWithBoundingBox(facing);
         LOGGER.info("Created painting entity - long");
-        LOGGER.info("Facing: " + facing.getName());
-        LOGGER.info(this.getBoundingBox().minX + " " + this.getBoundingBox().minY + " " + this.getBoundingBox().minZ);
-        LOGGER.info(this.getBoundingBox().maxX + " " + this.getBoundingBox().maxY + " " + this.getBoundingBox().maxZ);
-   }
+        LOGGER.info(this.hangingPosition.getX() + " " + this.hangingPosition.getY() + " " + this.hangingPosition.getZ());
+    }
+/*
+    @Override
+    protected void entityInit(){
+         super.entityInit();
+         DataParameter<Byte> facingSerial = dataManager.createKey(this.getClass(), DataSerializers.BYTE);
+         DataParameter<BlockPos> hangingPosSerial = dataManager.createKey(this.getClass(), DataSerializers.BLOCK_POS);
+         dataManager.register(facingSerial);
+         dataManager.register(hangingPosSerial);
+    }
+    */
 
-   @Override
+    @Override
     protected void updateFacingWithBoundingBox(EnumFacing facingDirectionIn) {
         Validate.notNull(facingDirectionIn);
         Validate.isTrue(facingDirectionIn.getAxis().isHorizontal());
@@ -96,22 +110,23 @@ public class EntityCustomPainting extends EntityHanging { //implements IEntityAd
         super.setBoundingBox(bb);
     }
 
-    /*
-   @Override
-   public void writeSpawnData(PacketBuffer buffer) {
-       buffer.writeVarInt(this.getEntityId());
-       buffer.writeUniqueId(this.getUniqueID());
-       buffer.writeBlockPos(this.getPosition());
-       buffer.writeByte(this.facingDirection.getHorizontalIndex());
-   }
+    @Override
+    public void writeSpawnData(PacketBuffer buffer) {
+        buffer.writeVarInt(this.getEntityId());
+        buffer.writeUniqueId(this.getUniqueID());
+        buffer.writeBlockPos(this.hangingPosition);
+        buffer.writeByte(this.facingDirection.getHorizontalIndex());
+    }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         this.setEntityId(additionalData.readVarInt());
         this.setUniqueId(additionalData.readUniqueId());
-        BlockPos pos = additionalData.readBlockPos();
-        this.setPosition(pos.getX(), pos.getY(), pos.getZ());
-        this.facingDirection = EnumFacing.byHorizontalIndex(additionalData.readUnsignedByte());
+        BlockPos receivedHangingPos = additionalData.readBlockPos();
+        this.hangingPosition = receivedHangingPos;
+        LOGGER.info("Received spawn data");
+        LOGGER.info(receivedHangingPos.getX() +" "+ receivedHangingPos.getY()+" "+receivedHangingPos.getZ());
+        this.facingDirection = EnumFacing.byHorizontalIndex(additionalData.readByte());
+        updateFacingWithBoundingBox(facingDirection);
     }
-     */
 }
